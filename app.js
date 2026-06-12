@@ -252,24 +252,35 @@ function renderField(step, value) {
   }
 
   if (step.type === "file") {
+    const fileName = typeof value === "string" ? value : "";
     return `
       <div class="field">
         <span class="voice-label">${step.label}</span>
         <div class="fake-upload">
-          <button id="photoBtn" class="ghost-btn" type="button">上传照片</button>
-          <span class="file-status">${value || "未选择照片"}</span>
+          <button id="photoBtn" class="ghost-btn" type="button">选择照片</button>
+          <span class="file-status">${fileName ? `<span class="file-done">${escapeHtml(fileName)}</span>` : "未选择照片"}</span>
         </div>
+        <input id="photoInput" type="file" accept="image/*" style="display:none">
       </div>
     `;
   }
 
   if (step.type === "voice") {
+    const voiceState = state._voiceState || { status: "", fileName: "" };
     return `
       <div class="field">
         <span class="voice-label">${step.label}</span>
         <div class="voice-box">
-          <button id="voiceBtn" class="ghost-btn" type="button">开始录制</button>
-          <span class="voice-status">${value || "尚未录制"}</span>
+          <button id="voiceBtn" class="ghost-btn ${voiceState.status === 'recording' ? 'recording' : ''}" type="button">
+            ${voiceState.status === 'recording' ? '⏹ 停止录制' : '🎤 开始录制'}
+          </button>
+          <span class="voice-status">
+            ${voiceState.status === 'recording'
+              ? '<span class="voice-recording">● 录制中…</span>'
+              : voiceState.fileName
+                ? `<span class="voice-done">✓ ${escapeHtml(voiceState.fileName)}</span>`
+                : '尚未录制'}
+          </span>
         </div>
       </div>
     `;
@@ -348,20 +359,38 @@ function bindField(step) {
 
   if (step.type === "voice") {
     const voiceBtn = document.querySelector("#voiceBtn");
-    voiceBtn.addEventListener("click", () => {
-      state.answers.voice = "声音样本已录制";
-      state.error = "";
-      renderStep();
+
+    voiceBtn.addEventListener("click", async () => {
+      // 如果正在录制 → 停止
+      if (state._voiceState && state._voiceState.status === "recording") {
+        stopVoiceRecording();
+        return;
+      }
+
+      // 开始录制
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        startVoiceRecording(stream, voiceBtn);
+      } catch (err) {
+        state.error = "无法访问麦克风，请允许浏览器使用麦克风后重试。";
+        renderStep();
+      }
     });
     return;
   }
 
   if (step.type === "file") {
     const photoBtn = document.querySelector("#photoBtn");
+    const photoInput = document.querySelector("#photoInput");
     photoBtn.addEventListener("click", () => {
-      state.answers.photo = "照片已上传";
-      state.error = "";
-      renderStep();
+      photoInput.click();
+    });
+    photoInput.addEventListener("change", () => {
+      if (photoInput.files && photoInput.files[0]) {
+        state.answers.photo = photoInput.files[0].name;
+        state.error = "";
+        renderStep();
+      }
     });
     return;
   }
@@ -490,9 +519,14 @@ backBtn.addEventListener("click", () => {
 });
 
 restartBtn.addEventListener("click", () => {
+  // 停止正在进行的录音
+  if (state._voiceState && state._voiceState.status === "recording") {
+    stopVoiceRecording();
+  }
   state.current = 0;
   state.phase = "info";
   state.answers = {};
+  state._voiceState = null;
   state.testIndex = 0;
   state.testAnswers = {};
   state.error = "";
@@ -808,6 +842,70 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+// ── 录音功能 ──
+let _mediaRecorder = null;
+let _mediaStream = null;
+let _voiceTimer = null;
+
+function startVoiceRecording(stream, btn) {
+  const chunks = [];
+  _mediaStream = stream;
+
+  try {
+    _mediaRecorder = new MediaRecorder(stream);
+  } catch (e) {
+    // fallback: 某些浏览器需要特定 mimeType
+    _mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+  }
+
+  _mediaRecorder.ondataavailable = (e) => {
+    if (e.data && e.data.size > 0) chunks.push(e.data);
+  };
+
+  _mediaRecorder.onstop = () => {
+    // 生成文件名
+    const now = new Date();
+    const ts = `${String(now.getHours()).padStart(2,"0")}${String(now.getMinutes()).padStart(2,"0")}${String(now.getSeconds()).padStart(2,"0")}`;
+    const fileName = `语音_${ts}.webm`;
+
+    state._voiceState = { status: "done", fileName: fileName };
+    state.answers.voice = fileName;
+    state.error = "";
+
+    // 关闭所有音频轨道
+    if (_mediaStream) {
+      _mediaStream.getTracks().forEach((t) => t.stop());
+      _mediaStream = null;
+    }
+    _mediaRecorder = null;
+
+    renderStep();
+  };
+
+  _mediaRecorder.start();
+  state._voiceState = { status: "recording", fileName: "" };
+  renderStep();
+
+  // 录制时长提示（每秒更新按钮文字）
+  let seconds = 0;
+  _voiceTimer = setInterval(() => {
+    seconds++;
+    if (btn && btn.textContent.includes("⏹")) {
+      btn.textContent = `⏹ 停止录制 (${seconds}s)`;
+    }
+  }, 1000);
+}
+
+function stopVoiceRecording() {
+  if (_voiceTimer) {
+    clearInterval(_voiceTimer);
+    _voiceTimer = null;
+  }
+  if (_mediaRecorder && _mediaRecorder.state !== "inactive") {
+    _mediaRecorder.stop();
+  }
 }
 
 renderStep();

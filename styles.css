@@ -846,3 +846,37 @@ h1 {
   font-weight: 900;
   word-break: break-all;
 }
+
+/* ── 照片上传状态 ── */
+.file-done {
+  color: var(--brand-dark);
+  font-weight: 800;
+}
+
+/* ── 录音状态 ── */
+.voice-box button.recording {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: #fff;
+  animation: pulseRec 1s ease-in-out infinite;
+}
+
+@keyframes pulseRec {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+
+.voice-recording {
+  color: var(--danger);
+  font-weight: 900;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.voice-done {
+  color: var(--brand-dark);
+  font-weight: 800;
+}
