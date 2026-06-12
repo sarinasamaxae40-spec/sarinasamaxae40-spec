@@ -773,3 +773,76 @@ h1 {
   border-style: dashed;
   background: #fafafa;
 }
+
+/* ── 信息清单（数据披露）── */
+.data-disclosure {
+  margin-top: 20px;
+  padding: 18px;
+  border: 2px solid var(--danger);
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fff5f5, #fef2f2);
+}
+
+.disclosure-title {
+  margin-bottom: 4px;
+  color: var(--danger);
+  font-size: 17px;
+}
+
+.disclosure-count {
+  margin-bottom: 14px;
+  color: var(--warn);
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.disclosure-section {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid #fecaca;
+}
+
+.disclosure-section h4 {
+  margin-bottom: 10px;
+  font-size: 15px;
+  color: var(--danger);
+  border-bottom: 1px solid #fecaca;
+  padding-bottom: 6px;
+}
+
+.data-disclosure ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.data-disclosure li {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  padding: 7px 0;
+  border-bottom: 1px dashed #fde0e0;
+  font-size: 14px;
+}
+
+.data-disclosure li:last-child {
+  border-bottom: none;
+}
+
+.dl {
+  flex-shrink: 0;
+  min-width: 110px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.dv {
+  color: var(--danger);
+  font-weight: 900;
+  word-break: break-all;
+}

@@ -509,6 +509,72 @@ teacherBtn.addEventListener("click", () => {
 function finishGame() {
   const report = reports[Math.floor(Math.random() * reports.length)];
   const name = state.answers.name || "你";
+
+  // ── 构建信息清单（在清空前保存）──
+  const infoSections = [];
+  infoSections.push({ title: "📋 第一部分：你的个人信息", items: [] });
+
+  if (state.answers.name) {
+    infoSections[0].items.push({ label: "真实姓名", value: state.answers.name });
+  }
+  if (state.answers.contactWeixin) {
+    infoSections[0].items.push({ label: "微信号", value: state.answers.contactWeixin });
+  }
+  if (state.answers.contactPhone) {
+    infoSections[0].items.push({ label: "手机号码", value: state.answers.contactPhone });
+  }
+  if (state.answers.birthday) {
+    infoSections[0].items.push({ label: "出生日期", value: state.answers.birthday });
+  }
+  if (state.answers.address) {
+    infoSections[0].items.push({ label: "当前位置 / 地址", value: state.answers.address });
+  }
+  if (state.answers.photo) {
+    infoSections[0].items.push({ label: "个人照片", value: state.answers.photo });
+  }
+  if (state.answers.voice) {
+    infoSections[0].items.push({ label: "声音样本", value: state.answers.voice });
+  }
+
+  // 第二部分：问卷中收集的他人信息
+  const testInfoItems = [];
+
+  // 家人信息
+  const q6 = state.testAnswers.q6 || {};
+  if (q6.familyName || q6.familyPhone || q6.familyWork) {
+    testInfoItems.push({ group: "👨‍👩‍👧 家庭成员信息（第 6 题）", items: [
+      { label: "家人姓名", value: q6.familyName },
+      { label: "家人电话", value: q6.familyPhone },
+      { label: "工作单位", value: q6.familyWork },
+    ].filter(i => i.value) });
+  }
+
+  // 同桌信息
+  const q8 = state.testAnswers.q8 || {};
+  if (q8.deskMateName || q8.deskMateNick || q8.deskMatePhone) {
+    testInfoItems.push({ group: "👥 同桌基本信息（第 8 题）", items: [
+      { label: "同桌姓名", value: q8.deskMateName },
+      { label: "同桌昵称/外号", value: q8.deskMateNick },
+      { label: "同桌手机号", value: q8.deskMatePhone },
+    ].filter(i => i.value) });
+  }
+
+  // 同学 & 班级信息
+  const q10 = state.testAnswers.q10 || {};
+  if (q10.school || q10.classInfo || q10.classmate1Name || q10.classmate2Name) {
+    testInfoItems.push({ group: "🏫 班级与同学信息（第 10 题）", items: [
+      { label: "学校名称", value: q10.school },
+      { label: "年级班级", value: q10.classInfo },
+      { label: "同学 1 姓名", value: q10.classmate1Name },
+      { label: "同学 1 昵称", value: q10.classmate1Nick },
+      { label: "同学 1 手机号", value: q10.classmate1Phone },
+      { label: "同学 2 姓名", value: q10.classmate2Name },
+      { label: "同学 2 昵称", value: q10.classmate2Nick },
+      { label: "同学 2 手机号", value: q10.classmate2Phone },
+    ].filter(i => i.value) });
+  }
+
+  // 渲染假报告
   relationshipReport.innerHTML = `
     <p class="report-kicker">人际关系报告已生成</p>
     <h2>${escapeHtml(name)}：${report.type}</h2>
@@ -521,12 +587,49 @@ function finishGame() {
       ${report.traits.map((trait) => `<li>${trait}</li>`).join("")}
     </ul>
     <p class="report-advice">${report.advice}</p>
+
+    ${buildDataDisclosure(infoSections, testInfoItems)}
   `;
+
   state.answers = {};
   state.testAnswers = {};
   reveal.classList.remove("hidden");
   updateHud();
   reveal.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function buildDataDisclosure(infoSections, testInfoItems) {
+  const totalItems = infoSections.reduce((sum, s) => sum + s.items.length, 0)
+    + testInfoItems.reduce((sum, g) => sum + g.items.length, 0);
+
+  let html = `
+    <div class="data-disclosure">
+      <h3 class="disclosure-title">⚠️ 你刚刚提交了以下全部信息</h3>
+      <p class="disclosure-count">共 ${totalItems} 条信息已被"收集"</p>
+  `;
+
+  // 第一部分个人信息
+  if (infoSections[0] && infoSections[0].items.length > 0) {
+    html += `<div class="disclosure-section"><h4>${infoSections[0].title}</h4><ul>`;
+    html += infoSections[0].items.map(item =>
+      `<li><span class="dl">${item.label}</span> <span class="dv">${escapeHtml(item.value)}</span></li>`
+    ).join("");
+    html += `</ul></div>`;
+  }
+
+  // 第二部分他人信息
+  if (testInfoItems.length > 0) {
+    for (const group of testInfoItems) {
+      html += `<div class="disclosure-section"><h4>${group.group}</h4><ul>`;
+      html += group.items.map(item =>
+        `<li><span class="dl">${item.label}</span> <span class="dv">${escapeHtml(item.value)}</span></li>`
+      ).join("");
+      html += `</ul></div>`;
+    }
+  }
+
+  html += `</div>`;
+  return html;
 }
 
 function renderQuestion() {
