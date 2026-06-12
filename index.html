@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>人际关系报告陷阱识别训练</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="game-shell">
+      <section class="stage" aria-labelledby="game-title">
+        <div class="topbar">
+          <div>
+            <p class="kicker">课堂互动游戏</p>
+            <h1 id="game-title">星缘人际关系测评</h1>
+          </div>
+        </div>
+
+        <div class="layout">
+          <aside class="avatar-panel" aria-label="关系报告预览">
+            <div class="avatar-card">
+              <div class="scan-line"></div>
+              <div class="avatar">
+                <div class="avatar-face">
+                  <span class="eye left"></span>
+                  <span class="eye right"></span>
+                  <span class="mouth"></span>
+                </div>
+              </div>
+              <div class="avatar-meta">
+                <span id="avatarName">未命名关系档案</span>
+                <span id="avatarStatus">等待测评资料同步</span>
+              </div>
+            </div>
+
+            <div class="bait-card">
+              <p class="bait-title">活动承诺</p>
+              <p>提交资料即可生成专属人际关系报告，解锁友谊亲密度、同学缘分值和隐藏关系建议。</p>
+            </div>
+
+          </aside>
+
+          <section class="mission-card">
+            <div class="progress-wrap" aria-label="游戏进度">
+              <div class="progress-label">
+                <span id="stepName">身份绑定</span>
+                <span id="stepCount">1/6</span>
+              </div>
+              <div class="progress-track">
+                <div id="progressBar" class="progress-bar"></div>
+              </div>
+            </div>
+
+            <div id="mission" class="mission" aria-live="polite"></div>
+
+            <div class="actions">
+              <button id="backBtn" class="ghost-btn" type="button">上一步</button>
+              <button id="nextBtn" class="primary-btn" type="button">继续测评</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="reveal" class="reveal hidden" aria-labelledby="reveal-title">
+        <div class="reveal-inner">
+          <div id="relationshipReport" class="relationship-report"></div>
+          <p class="alarm">风险揭示</p>
+          <h2 id="reveal-title">你被骗了</h2>
+          <p class="reveal-copy">
+            这个页面用“测试人际关系、生成专属报告”的理由，先索取了姓名、手机号、出生日期、住址、照片和声音，
+            又在第二部分混入题目，试图收集朋友、同学和家人的联系方式、住址、照片等信息。
+            在真实网络环境中，这些信息足以被用于骚扰、冒充身份、精准诈骗，甚至制作仿冒照片和声音。
+          </p>
+
+          <div class="review-grid">
+            <article>
+              <h3>诈骗话术</h3>
+              <p>免费测评、专属报告、隐藏关系建议，这些词会让人急着提交资料。</p>
+            </article>
+            <article>
+              <h3>过度索权</h3>
+              <p>普通人际关系测试不需要住址、手机号、照片，也不该索要你身边人的隐私。</p>
+            </article>
+            <article>
+              <h3>缺少说明</h3>
+              <p>没有主办方、隐私政策、删除方式和联系方式，就是明显风险。</p>
+            </article>
+            <article>
+              <h3>正确做法</h3>
+              <p>先停下，问清用途；不要上传照片和声音；向老师、家长或平台举报。</p>
+            </article>
+          </div>
+
+          <div class="safe-note">
+            <strong>本游戏安全说明：</strong>
+            你输入的内容没有上传，也没有保存。点击下方按钮会清空页面内的演示数据并重新开始。
+          </div>
+
+          <div class="reveal-actions">
+            <button id="restartBtn" class="primary-btn" type="button">重新挑战</button>
+            <button id="teacherBtn" class="ghost-btn" type="button">课堂复盘题</button>
+          </div>
+
+          <div id="teacherNotes" class="teacher-notes hidden">
+            <h3>课堂复盘题</h3>
+            <ol>
+              <li>哪一步开始让你觉得“不太对”？为什么？</li>
+              <li>如果朋友把这个链接发给你，你会怎么提醒对方？</li>
+              <li>一个正规活动在收集信息前应该说明哪些内容？</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="./app.js?v=10"></script>
+  </body>
+</html>
